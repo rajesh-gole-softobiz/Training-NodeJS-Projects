@@ -1,0 +1,23 @@
+{
+  "name": "basic-information-site",
+  "version": "1.0.0",
+  "description": "Basic Information Site",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajesh-gole-softobiz/Training-NodeJS-Projects.git"
+  },
+  "author": "rajesh-gole",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rajesh-gole-softobiz/Training-NodeJS-Projects/issues"
+  },
+  "homepage": "https://github.com/rajesh-gole-softobiz/Training-NodeJS-Projects#readme",
+  "dependencies": {
+    "nodemon": "^2.0.19"
+  }
+}
