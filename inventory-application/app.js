@@ -16,7 +16,8 @@ var app = express();
 
 app.use(helmet());
 
-var mongoDB = process.env.MONGODB_URL;
+var dev_db_url = 'mongodb+srv://rajesh:1234@cluster0.uezi85v.mongodb.net/my_inventory?retryWrites=true&w=majority'
+var mongoDB = process.env.MONGODB_URL || dev_db_url;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 
 var db = mongoose.connection;
