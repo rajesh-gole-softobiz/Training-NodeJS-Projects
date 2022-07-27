@@ -1,6 +1,6 @@
 # Inventory Application
 
-[Live Preview](https://inventory-application-rajesh.herokuapp.com/groceries)
+## [Live Preview](https://inventory-application-rajesh.herokuapp.com/groceries)
 
 ### How to run?
 
