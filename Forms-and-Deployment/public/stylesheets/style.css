@@ -1,0 +1,12 @@
+.sidebar-nav {
+    margin-top: 20px;
+    padding: 0;
+    list-style: none;
+}
+li a{
+    color: rgb(19, 2, 210);
+}
+li a:hover{
+    color: rgb(249, 46, 10);
+    text-decoration: none;
+}
