@@ -1,41 +1,88 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const session = require("express-session");
+const express = require("express");
+var helmet = require("helmet");
+const MongoStore = require("connect-mongo")(session);
+const path = require("path");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const messageRouter = require("./routes/messages");
+const flash = require("connect-flash");
+const cookieParser = require("cookie-parser");
+const indexRouter = require("./routes/index");
+const userRouter = require("./routes/user");
+const keys = require("./config/keys");
+// require("dotenv").config();
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+//Mongoose Database setup
+const mongoose = require("mongoose");
+const mongoDb='mongodb+srv://rajesh:1234@cluster0.jhknlmb.mongodb.net/messageDB?retryWrites=true&w=majority';
+mongoose.connect(mongoDb, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true
+});
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "mongo connection error"));
+db.on("connected", () => console.log("DB Connected"));
 
-var app = express();
+const app = express();
+
+app.use(helmet());
+
+//Passport config
+require("./config/passport")(passport);
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "hbs");
+const hbs = require("hbs");
+hbs.registerPartials(__dirname + "/views/partials");
 
-app.use(logger('dev'));
-app.use(express.json());
+// Middleware
+app.use(express.static(path.join(__dirname, "public")));
+app.use(cookieParser(keys.key));
+
+app.use(
+  session({
+    store: new MongoStore({ mongooseConnection: db })
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(flash());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  if (req.user) {
+    res.locals.currentUserIsMember = req.user.isMember;
+    res.locals.currentUserIsAdmin = req.user.isAdmin;
+  }
+  // Should do something about this
+  res.locals.currentUser = req.user;
+  res.locals.success_msg = req.flash("success_msg");
+  res.locals.error_msg = req.flash("error_msg");
+  res.locals.info_msg = req.flash("info_msg");
+  res.locals.error = req.flash("error");
+
+  next();
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// Routes
+app.use("/messages", messageRouter);
+app.use("/users", ensureAuthenticated, userRouter);
+app.use("/", ensureNotAuthenticated, indexRouter);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`app listening on port ${port}`));
 
-module.exports = app;
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  else res.redirect("/login");
+}
+
+function ensureNotAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) return next();
+  else res.redirect("/users/dashboard");
+}
