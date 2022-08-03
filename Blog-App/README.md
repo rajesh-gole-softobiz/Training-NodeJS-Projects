@@ -1,5 +1,7 @@
 # Blog App
 
+## [📲Live Preview](https://blog-app-by-rajesh.herokuapp.com/)
+
 ### How to Run
 
 Step-1: 
